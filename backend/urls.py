@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from api.views import handler404
+from api.views import handler404, hello
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
+    path('', hello),
     path('api/v1/', include('api.urls')),
 ]
 
