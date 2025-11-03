@@ -23,22 +23,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install git+https://github.com/huggingface/transformers@8fb854cac869b42c87a7bd15d9298985c5aea96e
 
 RUN --mount=type=secret,id=SECRET_KEY,mode=0444,required=true \
-    sh -c 'printf "SECRET_KEY=%s\n" "$(cat /run/secrets/SECRET_KEY)" > .env'
+    ENV DEBUG="$(cat /run/secrets/SECRET_KEY)" > .env'
 
 RUN --mount=type=secret,id=HUGGINGFACEHUB_API_TOKEN,mode=0444,required=true \
     sh -c 'printf "HUGGINGFACEHUB_API_TOKEN=%s\n" "$(cat /run/secrets/HUGGINGFACEHUB_API_TOKEN)" >> .env'
 
-RUN --mount=type=secret,id=BUILD_MODE,mode=0444,required=true \
-    sh -c 'printf "BUILD_MODE=%s\n" "$(cat /run/secrets/BUILD_MODE)" >> .env'
+ARG ALLOWED_HOSTS
+ARG CSRF_TRUSTED_ORIGINS
 
-RUN --mount=type=secret,id=DEBUG,mode=0444,required=true \
-    sh -c 'printf "DEBUG=%s\n" "$(cat /run/secrets/DEBUG)" >> .env'
-
-RUN --mount=type=secret,id=ALLOWED_HOSTS,mode=0444,required=true \
-    sh -c 'printf "ALLOWED_HOSTS=%s\n" "$(cat /run/secrets/ALLOWED_HOSTS)" >> .env'
-
-RUN --mount=type=secret,id=CSRF_TRUSTED_ORIGINS,mode=0444,required=true \
-    sh -c 'printf "CSRF_TRUSTED_ORIGINS=%s\n" "$(cat /run/secrets/CSRF_TRUSTED_ORIGINS)" >> .env'
+RUN printf "ALLOWED_HOSTS=%s\n" "${ALLOWED_HOSTS}" >> .env
+RUN printf "CSRF_TRUSTED_ORIGINS=%s\n" "${CSRF_TRUSTED_ORIGINS}" >> .env
 
 # Copy the entire backend directory
 COPY . .
@@ -56,6 +50,7 @@ EXPOSE 7860
 ENV DJANGO_SETTINGS_MODULE=backend.settings
 ENV PYTHONUNBUFFERED=1
 ENV DEBUG=False
+ENV BUILD_MODE='production'
 
 # Run the application with uvicorn
 # Hugging Face Spaces will set PORT environment variable, default to 7860
