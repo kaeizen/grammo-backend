@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from agent_manager import get_or_create_agent, end_session, get_message_list
+from agent_manager import get_or_create_agent, end_session, get_message_list, maybe_delete_session_agent
 from django.conf import settings
 
 @csrf_exempt
@@ -19,7 +19,12 @@ def chat(request):
 	"""Start or continue an existing chat session."""
 	# Prefer secure HttpOnly cookie for session tracking
 	cookie_session = request.COOKIES.get("gm_session")
-	chat_session = request.data.get("chatSession", 0)
+
+	chat_session = int(request.data.get("chat_session", 0))
+	if chat_session == 0:
+		maybe_delete_session_agent(cookie_session)
+		cookie_session = None
+
 	message = request.data.get("message")
 
 	if not message:

@@ -169,6 +169,7 @@ STRUCTURED_CHAT = StructuredChatWrapper(CHAT)
 
 
 SESSION_AGENTS = {}
+SESSION_MEMORY = {}
 
 def set_session_agent(session_key):
 	memory = InMemorySaver()
@@ -178,24 +179,28 @@ def set_session_agent(session_key):
 		checkpointer=memory,
 	)
 	SESSION_AGENTS[session_key] = agent
+	SESSION_MEMORY[session_key] = memory
+
+def maybe_delete_session_agent(session_key):
+	if session_key and session_key in SESSION_AGENTS:
+		del SESSION_AGENTS[session_key]
+		del SESSION_MEMORY[session_key]
+		cache.delete(f"chat_session_{session_key}")
 
 def get_or_create_agent(cookie_session, chat_session):
 	"""Get or create an agent keyed by the provided cookie_session token."""
 	# Normalize to string to avoid type-mismatch keys
 	session_key = str(cookie_session) if cookie_session else None
 
-	print("start", session_key, chat_session)
 	if not session_key or chat_session == 0:
 		if session_key and session_key in SESSION_AGENTS:
-			del SESSION_AGENTS[session_key]
-			cache.delete(f"chat_session_{session_key}")
+			maybe_delete_session_agent(session_key)
 		session_key = str(uuid.uuid4())
 
 	if session_key not in SESSION_AGENTS:
 		set_session_agent(session_key)
 		cache.set(f"chat_session_{session_key}", True)
 
-	print("end", session_key, chat_session)
 	return SESSION_AGENTS.get(session_key), session_key
 
 
@@ -207,14 +212,13 @@ def end_session(cookie_session):
     """Delete an agent session to free memory."""
     session_key = str(cookie_session) if cookie_session is not None else None
     if session_key and session_key in SESSION_AGENTS:
-        del SESSION_AGENTS[session_key]
-        cache.delete(f"chat_session_{session_key}")
+       	maybe_delete_session_agent(session_key)
         return True
     return False
 
 def get_message_list(mode, tone, message):
 	messages = []
-	content = ''
+	content = message
 
 	if mode == 'default' and tone == 'default':
 		messages = [{
@@ -223,21 +227,25 @@ def get_message_list(mode, tone, message):
 		}]
 		return messages
 
+	add_backticks = False
 	if mode == 'grammar':
-		content = f"""Carefully review the following text (inside triple backticks) for grammar, spelling, and punctuation mistakes. Correct any errors you find and provide suggestions for improvement if appropriate.
-
-		```{message}```
-		"""
-	else:
-		content = f"{message}\n"
+		messages.append({
+			"role": "system",
+			"content": "Carefully review the following text (inside triple backticks) for grammar, spelling, and punctuation mistakes. Correct any errors you find and provide suggestions for improvement if appropriate."
+		})
+		add_backticks = True
 
 	if tone != 'default':
-		content += f"Please use a {tone} tone while preserving its original meaning and clarity."
+		messages.append({
+			"role": "system",
+			"content": f"Ensure that your translation or corrected grammar is expressed in a {tone} tone, while strictly preserving the sentence's original meaning and clarity.",
+		})
 
+	if add_backticks:
+		content = f"```{message}```"
 
-	messages = [{
+	messages.append({
 		"role": "user",
 		"content": content
-	}]
+	})
 	return messages
-
