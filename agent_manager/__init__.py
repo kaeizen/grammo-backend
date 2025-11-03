@@ -165,6 +165,7 @@ def get_or_create_agent(session, chat_session):
 		set_session_agent(session_key)
 
 	cache_key = f"chat_session_{session_key}"
+	print(f"chat_session_{session_key}")
 	# Check if session key exists in cache
 	cached_chat_session = cache.get(cache_key)
 
@@ -180,6 +181,7 @@ def get_or_create_agent(session, chat_session):
 		# Session key doesn't exist, add it to cache
 		cache.set(cache_key, chat_session)
 
+	print(SESSION_AGENTS)
 	return SESSION_AGENTS.get(session_key)
 
 
