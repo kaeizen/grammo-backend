@@ -1,3 +1,14 @@
+---
+title: Grammo
+emoji: 👀
+colorFrom: purple
+colorTo: yellow
+sdk: docker
+pinned: false
+license: gpl-3.0
+short_description: AI Translation and Grammar Correction
+---
+
 # Grammo Backend
 
 Django REST API backend for Grammo, an AI-powered translation and grammar correction service.
@@ -371,3 +382,15 @@ curl -X POST http://localhost:8000/api/v1/end/
 
 See the [LICENSE](LICENSE) file for details.
 
+---
+title: Grammo
+emoji: 👀
+colorFrom: purple
+colorTo: yellow
+sdk: docker
+pinned: false
+license: gpl-3.0
+short_description: AI Translation and Grammar Correction
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
