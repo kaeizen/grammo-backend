@@ -1,19 +1,23 @@
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework import status
 from agent_manager import get_or_create_agent, end_session, get_message_list
 import logging
 
 @csrf_exempt
+@permission_classes([AllowAny])
 @api_view(['GET'])
 def hello(request):
     return Response({"message": "Hello from Grammo!"})
 
 @csrf_exempt
+@permission_classes([AllowAny])
 @api_view(['POST'])
 def chat(request):
 	"""Start or continue an existing chat session."""
+	logging.getLogger(__name__).info(f"Received a chat request.")
 	chat_session = request.data.get("chatSession")
 	message = request.data.get("message")
 	logging.getLogger(__name__).info(f"Received message: {message}")
@@ -49,6 +53,7 @@ def chat(request):
 	}, status=status.HTTP_200_OK)
 
 @csrf_exempt
+@permission_classes([AllowAny])
 @api_view(['POST'])
 def end(request):
     """End and delete the chat session."""
