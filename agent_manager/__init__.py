@@ -17,7 +17,31 @@ import uuid
 # Load environment variables from .env file
 load_dotenv()
 
-API_KEY = os.environ["HUGGINGFACEHUB_API_TOKEN"]
+# Try multiple environment variable names for HuggingFace token
+API_KEY = (
+    os.environ.get("HUGGINGFACEHUB_API_TOKEN") or
+    os.environ.get("HF_TOKEN") or
+    os.environ.get("HF_API_TOKEN")
+)
+
+if not API_KEY:
+    raise ValueError(
+        "HuggingFace API token not found. Please set one of the following environment variables:\n"
+        "  - HUGGINGFACEHUB_API_TOKEN (preferred)\n"
+        "  - HF_TOKEN\n"
+        "  - HF_API_TOKEN\n\n"
+        "Get your token from: https://huggingface.co/settings/tokens\n"
+        "Make sure to create a .env file in the backend directory with your token."
+    )
+
+if not API_KEY.strip():
+    raise ValueError(
+        "HuggingFace API token is empty. Please check your .env file or environment variables."
+    )
+
+# Set HF_TOKEN for huggingface-hub library compatibility
+os.environ["HF_TOKEN"] = API_KEY
+
 SYSTEM_PROMPT = """
 You are an expert linguistic assistant specializing in grammar correction and translation. Your responses must always be accurate, concise, clear, and easy to understand.
 
@@ -113,6 +137,8 @@ MODEL = HuggingFaceEndpoint(
     repetition_penalty=1.03,
     huggingfacehub_api_token=API_KEY
 )
+
+
 
 CHAT = ChatHuggingFace(llm=MODEL).with_structured_output(schema=Response, method='json_schema')
 STRUCTURED_CHAT = StructuredChatWrapper(CHAT)

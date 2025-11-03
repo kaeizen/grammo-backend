@@ -19,6 +19,9 @@ RUN pip install --upgrade pip
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install specific transformers
+RUN pip install git+https://github.com/huggingface/transformers@8fb854cac869b42c87a7bd15d9298985c5aea96e
+
 # Copy the entire backend directory
 COPY . .
 

@@ -53,7 +53,6 @@ tenacity==9.1.2
 tokenizers==0.22.1
 torch==2.9.0
 tqdm==4.67.1
-transformers @ git+https://github.com/huggingface/transformers@8fb854cac869b42c87a7bd15d9298985c5aea96e
 typer-slim==0.20.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0

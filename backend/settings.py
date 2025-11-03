@@ -37,7 +37,7 @@ ALLOWED_HOSTS = [
 ] if os.environ.get("ALLOWED_HOSTS") else []
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = [os.environ.get("CORS_ALLOW_ALL_ORIGINS", "").strip()] if os.environ.get("CORS_ALLOW_ALL_ORIGINS") is not None else True
+CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL_ORIGINS", "True") == "True"
 
 
 SESSION_COOKIE_HTTPONLY = True
