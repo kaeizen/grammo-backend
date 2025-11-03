@@ -146,7 +146,6 @@ STRUCTURED_CHAT = StructuredChatWrapper(CHAT)
 SESSION_AGENTS = {}
 
 def set_session_agent(session_key):
-	print(f"New session created: {session_key}")
 	memory = InMemorySaver()
 	agent = create_agent(
 		model=STRUCTURED_CHAT,
@@ -155,45 +154,31 @@ def set_session_agent(session_key):
 	)
 	SESSION_AGENTS[session_key] = agent
 
-def get_or_create_agent(session, chat_session):
-	"""Get the agent for this session or create a new one."""
-	session_key = session.session_key
+def get_or_create_agent(chat_session):
+    """Get or create an agent keyed by the provided chat_session token."""
+    # Normalize to string to avoid type-mismatch keys
+    session_key = str(chat_session) if chat_session else None
 
-	if not session_key:
-		session.create()
-		session_key = session.session_key
-		set_session_agent(session_key)
+    if not session_key:
+        session_key = str(uuid.uuid4())
 
-	cache_key = f"chat_session_{session_key}"
-	print(f"chat_session_{session_key}")
-	# Check if session key exists in cache
-	cached_chat_session = cache.get(cache_key)
+    if session_key not in SESSION_AGENTS:
+        set_session_agent(session_key)
+        cache.set(f"chat_session_{session_key}", True)
 
-	if cached_chat_session is not None:
-		# Session key exists in cache
-		if cached_chat_session != chat_session:
-			# Chat session is different, update to new session agent
-			set_session_agent(session_key)
-			# Update cache with new chat_session
-			cache.set(cache_key, chat_session)
-		# If chat_session is the same, continue without changes
-	else:
-		# Session key doesn't exist, add it to cache
-		cache.set(cache_key, chat_session)
-
-	print(SESSION_AGENTS)
-	return SESSION_AGENTS.get(session_key)
+    return SESSION_AGENTS.get(session_key), session_key
 
 
 def get_agent(session_id: str):
     """Return an existing agent for a session, or None if expired/closed."""
     return SESSION_AGENTS.get(session_id)
 
-def end_session(session):
+def end_session(chat_session):
     """Delete an agent session to free memory."""
-    session_key = session.session_key
-    if session_key in SESSION_AGENTS:
+    session_key = str(chat_session) if chat_session is not None else None
+    if session_key and session_key in SESSION_AGENTS:
         del SESSION_AGENTS[session_key]
+        cache.delete(f"chat_session_{session_key}")
         return True
     return False
 

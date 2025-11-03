@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from agent_manager import get_or_create_agent, end_session, get_message_list
+from django.conf import settings
 
 @csrf_exempt
 @permission_classes([AllowAny])
@@ -16,7 +17,8 @@ def hello(request):
 @api_view(['POST'])
 def chat(request):
 	"""Start or continue an existing chat session."""
-	chat_session = request.data.get("chatSession")
+	# Prefer secure HttpOnly cookie for session tracking
+	cookie_session = request.COOKIES.get("gm_session")
 	message = request.data.get("message")
 
 	if not message:
@@ -25,15 +27,15 @@ def chat(request):
 			"response": "Invalid message."
 		}, status=status.HTTP_400_BAD_REQUEST)
 
-	agent = get_or_create_agent(request.session, chat_session)
+	# Use cookie if present; otherwise create a new session
+	agent, session_key = get_or_create_agent(cookie_session)
 
 	mode = request.data.get("mode")
 	tone = request.data.get("tone")
 	messages = get_message_list(mode, tone, message)
 
-	print("Message:", message, "Session Key:", request.session.session_key)
 	result = agent.invoke({ "messages": messages },
-		config={ "configurable": {"thread_id": request.session.session_key } }
+		config={ "configurable": {"thread_id": session_key } }
 	)
 
 	last_message = result.get('messages', [])[-1] if result.get('messages') else None
@@ -44,20 +46,37 @@ def chat(request):
 			"response": "Server Error"
 		}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-	return Response({
+	resp = Response({
 		"status": "success",
 		"response": last_message.content
 	}, status=status.HTTP_200_OK)
+
+	# If cookie was missing, set it now with secure attributes
+	if not cookie_session:
+		secure = True if settings.MODE == 'production' else False
+		samesite = 'None' if settings.MODE == 'production' else 'Lax'
+		resp.set_cookie(
+			"gm_session",
+			value=session_key,
+			httponly=True,
+			secure=secure,
+			samesite=samesite,
+			max_age=60 * 60 * 24
+		)
+
+	return resp
 
 @csrf_exempt
 @permission_classes([AllowAny])
 @api_view(['POST'])
 def end(request):
     """End and delete the chat session."""
-    if end_session(request.session):
-        request.session.flush()
-        return Response({"status": "success", "message": "Session ended successfully"})
-
+    cookie_session = request.COOKIES.get("gm_session")
+    if end_session(cookie_session):
+        resp = Response({"status": "success", "message": "Session ended successfully"})
+        # Clear cookie
+        resp.delete_cookie("gm_session")
+        return resp
     return Response({
         "status": "error",
         "response": "No active session."
