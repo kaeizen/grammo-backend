@@ -22,20 +22,23 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install specific transformers
 RUN pip install git+https://github.com/huggingface/transformers@8fb854cac869b42c87a7bd15d9298985c5aea96e
 
-RUN --mount=type=secret,id=SECRET_KEY,env=SECRET_KEY
-RUN --mount=type=secret,id=HUGGINGFACEHUB_API_TOKEN,env=HUGGINGFACEHUB_API_TOKEN
+RUN --mount=type=secret,id=SECRET_KEY,mode=0444,required=true \
+    sh -c 'printf "SECRET_KEY=%s\n" "$(cat /run/secrets/SECRET_KEY)" > .env'
 
-RUN --mount=type=secret,id=DEBUG,env=DEBUG
-RUN --mount=type=secret,id=SESSION_COOKIE_SECURE,env=SESSION_COOKIE_SECURE
-RUN --mount=type=secret,id=CSRF_COOKIE_SECURE,env=CSRF_COOKIE_SECURE
-RUN --mount=type=secret,id=ALLOWED_HOSTS,env=ALLOWED_HOSTS
-RUN --mount=type=secret,id=SECURE_CONTENT_TYPE_NOSNIFF,env=SECURE_CONTENT_TYPE_NOSNIFF
-RUN --mount=type=secret,id=SECURE_SSL_REDIRECT,env=SECURE_SSL_REDIRECT
-RUN --mount=type=secret,id=SECURE_HSTS_SECONDS,env=SECURE_HSTS_SECONDS
-RUN --mount=type=secret,id=SECURE_HSTS_INCLUDE_SUBDOMAINS,env=SECURE_HSTS_INCLUDE_SUBDOMAINS
-RUN --mount=type=secret,id=SECURE_HSTS_PRELOAD,env=SECURE_HSTS_PRELOAD
-RUN --mount=type=secret,id=CORS_ALLOW_ALL_ORIGINS,env=CORS_ALLOW_ALL_ORIGINS
-RUN --mount=type=secret,id=CSRF_TRUSTED_ORIGINS,env=CSRF_TRUSTED_ORIGINS
+RUN --mount=type=secret,id=HUGGINGFACEHUB_API_TOKEN,mode=0444,required=true \
+    sh -c 'printf "HUGGINGFACEHUB_API_TOKEN=%s\n" "$(cat /run/secrets/HUGGINGFACEHUB_API_TOKEN)" >> .env'
+
+RUN --mount=type=secret,id=MODE,mode=0444,required=true \
+    sh -c 'printf "MODE=%s\n" "$(cat /run/secrets/MODE)" >> .env'
+
+RUN --mount=type=secret,id=DEBUG,mode=0444,required=true \
+    sh -c 'printf "DEBUG=%s\n" "$(cat /run/secrets/DEBUG)" >> .env'
+
+RUN --mount=type=secret,id=ALLOWED_HOSTS,mode=0444,required=true \
+    sh -c 'printf "ALLOWED_HOSTS=%s\n" "$(cat /run/secrets/ALLOWED_HOSTS)" >> .env'
+
+RUN --mount=type=secret,id=CSRF_TRUSTED_ORIGINS,mode=0444,required=true \
+    sh -c 'printf "CSRF_TRUSTED_ORIGINS=%s\n" "$(cat /run/secrets/CSRF_TRUSTED_ORIGINS)" >> .env'
 
 # Copy the entire backend directory
 COPY . .

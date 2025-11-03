@@ -30,41 +30,47 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "local-dev-secret")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = [
+MODE = os.environ.get("MODE", "development")
+
+ALLOWED_HOSTS =[
     origin.strip()
     for origin in os.environ.get("ALLOWED_HOSTS", "").split(",")
     if origin.strip()
-] if os.environ.get("ALLOWED_HOSTS") else []
+] if MODE == 'production' else []
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL_ORIGINS", "True") == "True"
+CORS_ALLOW_ALL_ORIGINS = False if MODE == 'production' else True
 
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False") == "True" # use False only for local dev (no HTTPS)
+SESSION_COOKIE_SECURE = False if MODE == 'production' else True # use False only for local dev (no HTTPS)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 60 * 60 * 24  # 1 day
 
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", "False") == "True"
+CSRF_COOKIE_SECURE = False if MODE == 'production' else True
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
-]
+] if MODE == 'production' else [
+	'http://localhost:5173',
+	'http://localhost:4173',
+	'http://localhost:3000'
+	]
 
-SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "False") == "True"
+SECURE_SSL_REDIRECT = False if MODE == 'production' else True
 
-SECURE_CONTENT_TYPE_NOSNIFF = os.environ.get("SECURE_CONTENT_TYPE_NOSNIFF", "False") == "True"
+SECURE_CONTENT_TYPE_NOSNIFF = False if MODE == 'production' else True
 
 # HSTS settings - only enable in production with proper HTTPS configuration
 # WARNING: Once enabled, browsers will remember this for SECURE_HSTS_SECONDS seconds
 # Only enable after ensuring HTTPS works correctly for all domains
 # Set to 0 to disable HSTS (default for development), or set a positive value (e.g., 31536000 for 1 year) for production
-SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "0"))
-if SECURE_HSTS_SECONDS > 0:
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get("SECURE_HSTS_INCLUDE_SUBDOMAINS", "False") == "True"
-    SECURE_HSTS_PRELOAD = os.environ.get("SECURE_HSTS_PRELOAD", "False") == "True"
+SECURE_HSTS_SECONDS = 31536000 if MODE == 'production' else 0
+if MODE == 'production':
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 
 # Allow embedding in an iframe only from Hugging Face Spaces (for integration)

@@ -73,18 +73,22 @@ pip install -r requirements.txt
 
 ### 4. Set up environment variables
 
-Create a `.env` file in the `backend` directory:
+Create a `.env` file in the `backend` directory (or copy from the example):
 
 ```bash
-touch .env
+cp .env.example .env  # or: touch .env
 ```
 
-Add the following environment variables (see [Environment Variables](#environment-variables) section for details):
+At minimum, set the variables below (see [Environment Variables](#environment-variables) for details):
 
 ```env
+# Required
 SECRET_KEY=your-secret-key-here
 HUGGINGFACEHUB_API_TOKEN=your-huggingface-api-token
+
+# Common
 DEBUG=True
+MODE=development  # change to "production" for deployment
 ```
 
 To generate a Django secret key:
@@ -101,48 +105,50 @@ python manage.py migrate
 
 ## Environment Variables
 
-Create a `.env` file in the `backend` directory with the following variables:
+Create a `.env` file in the `backend` directory. The backend loads variables from this file using `python-dotenv`.
 
-### Required Variables
+### Required
 
 ```env
 # Django Secret Key (generate one using the command above)
 SECRET_KEY=your-secret-key-here
 
-# HuggingFace API Token
+# HuggingFace API Token (any of these will be picked up; preferred shown first)
 HUGGINGFACEHUB_API_TOKEN=your-huggingface-api-token
+# HF_TOKEN=your-huggingface-api-token
+# HF_API_TOKEN=your-huggingface-api-token
 ```
 
-### Optional Development Variables
+### Core Runtime
 
 ```env
 # Debug mode (default: True)
 DEBUG=True
 
-# Session security (default: False for development)
-SESSION_COOKIE_SECURE=False  # Set to True in production (requires HTTPS)
-CSRF_COOKIE_SECURE=False     # Set to True in production (requires HTTPS)
+# App mode: "development" (default) or "production"
+MODE=development
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS=True  # Set to False in production and specify origins
+# Port only used when running `python app.py` (Hugging Face Spaces)
+# PORT=7860
 ```
 
-### Optional Production Variables
+### Production-only
+
+When `MODE=production`, the following become relevant:
 
 ```env
-# Allowed hosts (comma-separated)
+# Allowed hosts (comma-separated, no spaces)
 ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
 
 # CSRF trusted origins (comma-separated)
 CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
-
-# Security settings
-SECURE_SSL_REDIRECT=True
-SECURE_CONTENT_TYPE_NOSNIFF=True
-SECURE_HSTS_SECONDS=31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS=True
-SECURE_HSTS_PRELOAD=True
 ```
+
+Notes:
+- Most security and CORS flags are derived automatically from `MODE` in `backend/settings.py`:
+  - In development: permissive defaults for local usage
+  - In production: `CORS_ALLOW_ALL_ORIGINS=False`, secure cookies, HSTS, content type nosniff, and SSL redirect are enabled
+- Do not set `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `CORS_ALLOW_ALL_ORIGINS`, or `SECURE_*` directly via env; they are computed from `MODE`.
 
 ## Running the Application
 
@@ -323,12 +329,10 @@ The backend includes a `Dockerfile` configured for HuggingFace Spaces deployment
 1. **Set environment variables** in your Space settings:
    - `SECRET_KEY`
    - `HUGGINGFACEHUB_API_TOKEN`
+   - `MODE=production`
    - `DEBUG=False`
    - `ALLOWED_HOSTS=your-space-name.hf.space`
-   - `CORS_ALLOW_ALL_ORIGINS=False`
    - `CSRF_TRUSTED_ORIGINS=https://your-space-name.hf.space`
-   - `SESSION_COOKIE_SECURE=True`
-   - `CSRF_COOKIE_SECURE=True`
 
 2. **Push your code** to the Space repository
 
@@ -337,7 +341,8 @@ The backend includes a `Dockerfile` configured for HuggingFace Spaces deployment
 ### General Production Deployment
 
 1. Set production environment variables (see [Environment Variables](#environment-variables))
-2. Set `DEBUG=False`
+   - `MODE=production`, `DEBUG=False`
+   - `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`
 3. Configure a proper database (PostgreSQL recommended)
 4. Set up Redis or another cache backend for sessions
 5. Use a production ASGI server (Uvicorn with multiple workers or Gunicorn with Uvicorn workers)
