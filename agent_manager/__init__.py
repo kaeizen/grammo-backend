@@ -154,12 +154,15 @@ def set_session_agent(session_key):
 	)
 	SESSION_AGENTS[session_key] = agent
 
-def get_or_create_agent(chat_session):
-    """Get or create an agent keyed by the provided chat_session token."""
+def get_or_create_agent(cookie_session, chat_session):
+    """Get or create an agent keyed by the provided cookie_session token."""
     # Normalize to string to avoid type-mismatch keys
-    session_key = str(chat_session) if chat_session else None
+    session_key = str(cookie_session) if cookie_session else None
 
-    if not session_key:
+    if not session_key or int(chat_session) == 0:
+		if session_key in SESSION_AGENTS:
+			del SESSION_AGENTS[session_key]
+        	cache.delete(f"chat_session_{session_key}")
         session_key = str(uuid.uuid4())
 
     if session_key not in SESSION_AGENTS:
@@ -173,9 +176,9 @@ def get_agent(session_id: str):
     """Return an existing agent for a session, or None if expired/closed."""
     return SESSION_AGENTS.get(session_id)
 
-def end_session(chat_session):
+def end_session(cookie_session):
     """Delete an agent session to free memory."""
-    session_key = str(chat_session) if chat_session is not None else None
+    session_key = str(cookie_session) if cookie_session is not None else None
     if session_key and session_key in SESSION_AGENTS:
         del SESSION_AGENTS[session_key]
         cache.delete(f"chat_session_{session_key}")

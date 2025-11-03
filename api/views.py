@@ -19,6 +19,7 @@ def chat(request):
 	"""Start or continue an existing chat session."""
 	# Prefer secure HttpOnly cookie for session tracking
 	cookie_session = request.COOKIES.get("gm_session")
+	chat_session = request.data.get("chat_session")
 	message = request.data.get("message")
 
 	if not message:
@@ -28,7 +29,7 @@ def chat(request):
 		}, status=status.HTTP_400_BAD_REQUEST)
 
 	# Use cookie if present; otherwise create a new session
-	agent, session_key = get_or_create_agent(cookie_session)
+	agent, session_key = get_or_create_agent(cookie_session, chat_session)
 
 	mode = request.data.get("mode")
 	tone = request.data.get("tone")
