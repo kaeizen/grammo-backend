@@ -155,21 +155,21 @@ def set_session_agent(session_key):
 	SESSION_AGENTS[session_key] = agent
 
 def get_or_create_agent(cookie_session, chat_session):
-    """Get or create an agent keyed by the provided cookie_session token."""
-    # Normalize to string to avoid type-mismatch keys
-    session_key = str(cookie_session) if cookie_session else None
+	"""Get or create an agent keyed by the provided cookie_session token."""
+	# Normalize to string to avoid type-mismatch keys
+	session_key = str(cookie_session) if cookie_session else None
 
-    if not session_key or int(chat_session) == 0:
+	if not session_key or int(chat_session) == 0:
 		if session_key in SESSION_AGENTS:
 			del SESSION_AGENTS[session_key]
-        	cache.delete(f"chat_session_{session_key}")
-        session_key = str(uuid.uuid4())
+			cache.delete(f"chat_session_{session_key}")
+		session_key = str(uuid.uuid4())
 
-    if session_key not in SESSION_AGENTS:
-        set_session_agent(session_key)
-        cache.set(f"chat_session_{session_key}", True)
+	if session_key not in SESSION_AGENTS:
+		set_session_agent(session_key)
+		cache.set(f"chat_session_{session_key}", True)
 
-    return SESSION_AGENTS.get(session_key), session_key
+	return SESSION_AGENTS.get(session_key), session_key
 
 
 def get_agent(session_id: str):
