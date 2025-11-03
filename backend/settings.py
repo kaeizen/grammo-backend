@@ -76,6 +76,8 @@ if MODE == 'production':
 
 # Allow embedding in an iframe only from Hugging Face Spaces (for integration)
 X_FRAME_OPTIONS = 'ALLOW-FROM https://huggingface.co/'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
