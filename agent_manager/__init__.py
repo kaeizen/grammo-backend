@@ -159,8 +159,8 @@ def get_or_create_agent(cookie_session, chat_session):
 	# Normalize to string to avoid type-mismatch keys
 	session_key = str(cookie_session) if cookie_session else None
 
-	if not session_key or int(chat_session) == 0:
-		if session_key in SESSION_AGENTS:
+	if not session_key or chat_session == 0:
+		if session_key and session_key in SESSION_AGENTS:
 			del SESSION_AGENTS[session_key]
 			cache.delete(f"chat_session_{session_key}")
 		session_key = str(uuid.uuid4())

@@ -19,7 +19,7 @@ def chat(request):
 	"""Start or continue an existing chat session."""
 	# Prefer secure HttpOnly cookie for session tracking
 	cookie_session = request.COOKIES.get("gm_session")
-	chat_session = request.data.get("chat_session")
+	chat_session = request.data.get("chatSession", 0)
 	message = request.data.get("message")
 
 	if not message:

@@ -44,12 +44,12 @@ CORS_ALLOW_ALL_ORIGINS = False if MODE == 'production' else True
 
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = False if MODE == 'production' else True # use False only for local dev (no HTTPS)
+SESSION_COOKIE_SECURE = True if MODE == 'production' else False # secure cookies only over HTTPS in production
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 60 * 60 * 24  # 1 day
 
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = False if MODE == 'production' else True
+CSRF_COOKIE_SECURE = True if MODE == 'production' else False
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
@@ -60,9 +60,9 @@ CSRF_TRUSTED_ORIGINS = [
 	'http://localhost:3000'
 	]
 
-SECURE_SSL_REDIRECT = False if MODE == 'production' else True
+SECURE_SSL_REDIRECT = True if MODE == 'production' else False
 
-SECURE_CONTENT_TYPE_NOSNIFF = False if MODE == 'production' else True
+SECURE_CONTENT_TYPE_NOSNIFF = True if MODE == 'production' else False
 
 # HSTS settings - only enable in production with proper HTTPS configuration
 # WARNING: Once enabled, browsers will remember this for SECURE_HSTS_SECONDS seconds
