@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install git+https://github.com/huggingface/transformers@8fb854cac869b42c87a7bd15d9298985c5aea96e
 
 RUN --mount=type=secret,id=SECRET_KEY,mode=0444,required=true \
-    ENV DEBUG="$(cat /run/secrets/SECRET_KEY)" > .env'
+   sh -c 'printf "SECRET_KEY=%s\n" "$(cat /run/secrets/SECRET_KEY)" >> .env'
 
 RUN --mount=type=secret,id=HUGGINGFACEHUB_API_TOKEN,mode=0444,required=true \
     sh -c 'printf "HUGGINGFACEHUB_API_TOKEN=%s\n" "$(cat /run/secrets/HUGGINGFACEHUB_API_TOKEN)" >> .env'
@@ -36,9 +36,6 @@ RUN printf "CSRF_TRUSTED_ORIGINS=%s\n" "${CSRF_TRUSTED_ORIGINS}" >> .env
 
 # Copy the entire backend directory
 COPY . .
-
-# Collect static files (if needed)
-RUN python manage.py collectstatic --noinput || true
 
 # Run database migrations
 RUN python manage.py migrate --noinput || true
