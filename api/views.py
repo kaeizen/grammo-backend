@@ -4,7 +4,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from agent_manager import get_or_create_agent, end_session, get_message_list
-import logging
 
 @csrf_exempt
 @permission_classes([AllowAny])
@@ -17,11 +16,8 @@ def hello(request):
 @api_view(['POST'])
 def chat(request):
 	"""Start or continue an existing chat session."""
-	logging.getLogger(__name__).info(f"Received a chat request.")
 	chat_session = request.data.get("chatSession")
 	message = request.data.get("message")
-	logging.getLogger(__name__).info(f"Received message: {message}")
-
 
 	if not message:
 		return Response({

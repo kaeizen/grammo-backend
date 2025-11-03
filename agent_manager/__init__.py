@@ -103,7 +103,6 @@ class StructuredChatWrapper(BaseChatModel):
 
 		# 🔹 Run structured model only for valid task types
 		structured_response = self._structured_model.invoke(input_text)
-		print(structured_response)
 
 		if (structured_response['task_type'] == 'invalid' or structured_response['task_type'] == 'follow-up'):
 			json_content = structured_response['output']
