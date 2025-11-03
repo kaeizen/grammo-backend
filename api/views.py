@@ -31,6 +31,7 @@ def chat(request):
 	tone = request.data.get("tone")
 	messages = get_message_list(mode, tone, message)
 
+	print("Message:", message, "Session Key:", request.session.session_key)
 	result = agent.invoke({ "messages": messages },
 		config={ "configurable": {"thread_id": request.session.session_key } }
 	)

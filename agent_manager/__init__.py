@@ -146,6 +146,7 @@ STRUCTURED_CHAT = StructuredChatWrapper(CHAT)
 SESSION_AGENTS = {}
 
 def set_session_agent(session_key):
+	print(f"New session created: {session_key}")
 	memory = InMemorySaver()
 	agent = create_agent(
 		model=STRUCTURED_CHAT,
