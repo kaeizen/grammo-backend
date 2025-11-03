@@ -170,6 +170,8 @@ def get_or_create_agent(cookie_session, chat_session):
 		set_session_agent(session_key)
 		cache.set(f"chat_session_{session_key}", True)
 
+	print(session_key)
+
 	return SESSION_AGENTS.get(session_key), session_key
 
 
