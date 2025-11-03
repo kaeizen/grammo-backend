@@ -28,8 +28,8 @@ RUN --mount=type=secret,id=SECRET_KEY,mode=0444,required=true \
 RUN --mount=type=secret,id=HUGGINGFACEHUB_API_TOKEN,mode=0444,required=true \
     sh -c 'printf "HUGGINGFACEHUB_API_TOKEN=%s\n" "$(cat /run/secrets/HUGGINGFACEHUB_API_TOKEN)" >> .env'
 
-RUN --mount=type=secret,id=MODE,mode=0444,required=true \
-    sh -c 'printf "MODE=%s\n" "$(cat /run/secrets/MODE)" >> .env'
+RUN --mount=type=secret,id=BUILD_MODE,mode=0444,required=true \
+    sh -c 'printf "BUILD_MODE=%s\n" "$(cat /run/secrets/BUILD_MODE)" >> .env'
 
 RUN --mount=type=secret,id=DEBUG,mode=0444,required=true \
     sh -c 'printf "DEBUG=%s\n" "$(cat /run/secrets/DEBUG)" >> .env'

@@ -1,6 +1,6 @@
 ---
 title: Grammo
-emoji: 👀
+emoji: 📚
 colorFrom: purple
 colorTo: yellow
 sdk: docker
@@ -88,7 +88,7 @@ HUGGINGFACEHUB_API_TOKEN=your-huggingface-api-token
 
 # Common
 DEBUG=True
-MODE=development  # change to "production" for deployment
+BUILD_MODE=development  # change to "production" for deployment
 ```
 
 To generate a Django secret key:
@@ -125,8 +125,8 @@ HUGGINGFACEHUB_API_TOKEN=your-huggingface-api-token
 # Debug mode (default: True)
 DEBUG=True
 
-# App mode: "development" (default) or "production"
-MODE=development
+# App build mode: "development" (default) or "production"
+BUILD_MODE=development
 
 # Port only used when running `python app.py` (Hugging Face Spaces)
 # PORT=7860
@@ -134,7 +134,7 @@ MODE=development
 
 ### Production-only
 
-When `MODE=production`, the following become relevant:
+When `BUILD_MODE=production`, the following become relevant:
 
 ```env
 # Allowed hosts (comma-separated, no spaces)
@@ -145,10 +145,10 @@ CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 ```
 
 Notes:
-- Most security and CORS flags are derived automatically from `MODE` in `backend/settings.py`:
+- Most security and CORS flags are derived automatically from `BUILD_MODE` in `backend/settings.py`:
   - In development: permissive defaults for local usage
   - In production: `CORS_ALLOW_ALL_ORIGINS=False`, secure cookies, HSTS, content type nosniff, and SSL redirect are enabled
-- Do not set `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `CORS_ALLOW_ALL_ORIGINS`, or `SECURE_*` directly via env; they are computed from `MODE`.
+- Do not set `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `CORS_ALLOW_ALL_ORIGINS`, or `SECURE_*` directly via env; they are computed from `BUILD_MODE`.
 
 ## Running the Application
 
@@ -329,7 +329,7 @@ The backend includes a `Dockerfile` configured for HuggingFace Spaces deployment
 1. **Set environment variables** in your Space settings:
    - `SECRET_KEY`
    - `HUGGINGFACEHUB_API_TOKEN`
-   - `MODE=production`
+   - `BUILD_MODE=production`
    - `DEBUG=False`
    - `ALLOWED_HOSTS=your-space-name.hf.space`
    - `CSRF_TRUSTED_ORIGINS=https://your-space-name.hf.space`
@@ -341,7 +341,7 @@ The backend includes a `Dockerfile` configured for HuggingFace Spaces deployment
 ### General Production Deployment
 
 1. Set production environment variables (see [Environment Variables](#environment-variables))
-   - `MODE=production`, `DEBUG=False`
+   - `BUILD_MODE=production`, `DEBUG=False`
    - `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`
 3. Configure a proper database (PostgreSQL recommended)
 4. Set up Redis or another cache backend for sessions
