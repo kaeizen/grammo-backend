@@ -67,6 +67,9 @@ if SECURE_HSTS_SECONDS > 0:
     SECURE_HSTS_PRELOAD = os.environ.get("SECURE_HSTS_PRELOAD", "False") == "True"
 
 
+# Allow embedding in an iframe only from Hugging Face Spaces (for integration)
+X_FRAME_OPTIONS = 'ALLOW-FROM https://huggingface.co/'
+
 # Application definition
 
 INSTALLED_APPS = [
